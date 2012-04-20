@@ -50,7 +50,7 @@ class Root(object):
 
     @cherrypy.expose
     def default(self):
-        pass
+        return ''
 
     def __getattr__(self, name):
         if name.startswith('_') or name == 'exposed':
