@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
 #     wsreload - Reload your tabs !
@@ -65,6 +65,10 @@ chrome_parser.add_argument(
 chrome_parser.add_argument(
     '--index', dest='index', type=int,
     help='The position of the tabs within their windows.')
+
+chrome_parser.add_argument(
+    '--delay', dest='delay', type=int,
+    help='Delay to wait before refreshing.')
 
 parser = argparse.ArgumentParser(
     description='Reload all tabs matching query through websocket',
