@@ -89,8 +89,8 @@ query, _ = chrome_parser.parse_known_args()
 query = dict(filter(lambda x: x[1] is not None, vars(query).items()))
 
 opts = parser.parse_args()
-rc = ReloadClient(opts.host, opts.port, opts.endpoint, query,
-                  query if not opts.files else None)
+rc = ReloadClient(opts.host, opts.port, opts.endpoint, default_query=query,
+                  open_query=query if not opts.files else None)
 
 
 if opts.files:

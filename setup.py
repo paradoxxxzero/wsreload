@@ -18,7 +18,7 @@ class BuildScripts(build_scripts):
 
 setup(
     name="wsreload",
-    version='1.1.0',
+    version='1.1.1',
     description="Reload browser tabs through websocket",
     author="Florian Mounier",
     author_email="paradoxxx.zero@gmail.com",
