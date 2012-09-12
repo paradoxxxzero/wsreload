@@ -19,8 +19,10 @@
 
 
 import argparse
+import json
 import os
-from wsreload import ReloadClient
+import tornado.websocket
+from tornado.ioloop import IOLoop
 
 
 chrome_parser = argparse.ArgumentParser(
@@ -73,8 +75,7 @@ chrome_parser.add_argument(
 parser = argparse.ArgumentParser(
     description='Reload all tabs matching query through websocket',
     prog='wsreload',
-    parents=(chrome_parser,),
-    version='1.0')
+    parents=(chrome_parser,))
 
 parser.add_argument('-H', '--host', dest='host', type=str, default='127.0.0.1')
 parser.add_argument('-P', '--port', dest='port', type=int, default=50637)
@@ -89,9 +90,19 @@ query, _ = chrome_parser.parse_known_args()
 query = dict(filter(lambda x: x[1] is not None, vars(query).items()))
 
 opts = parser.parse_args()
-rc = ReloadClient(opts.host, opts.port, opts.endpoint, query,
-                  query if not opts.files else None)
+ioloop = IOLoop.instance()
 
+
+def websocket_ready(connection):
+    ws = connection.result()
+    ws.write_message('reload|' + json.dumps(query))
+    ioloop.stop()
+
+tornado.websocket.websocket_connect(
+    'ws://%s:%d/%s' % (opts.host, opts.port, opts.endpoint),
+    ioloop, websocket_ready)
+
+ioloop.start()
 
 if opts.files:
     import asyncore

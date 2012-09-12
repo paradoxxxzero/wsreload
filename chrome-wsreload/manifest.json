@@ -1,6 +1,6 @@
 {
     "name": "wsreload",
-    "version": "1.0",
+    "version": "1.9",
     "background": { "scripts": ["background.js"] },
     "description": "Reload your tabs throught websockets",
     "permissions": [

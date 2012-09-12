@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #     wsreload - Reload your tabs !
@@ -16,17 +16,15 @@
 #
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from wsreload import serve_forever
-import argparse
-parser = argparse.ArgumentParser(
-    description='wsreload server',
-    prog='wsreload-server',
-    version='1.0')
 
-parser.add_argument('-H', '--host', dest='host', type=str, default='127.0.0.1')
-parser.add_argument('-P', '--port', dest='port', type=int, default=50637)
-
-args = parser.parse_args()
+from wsreload import server
+from tornado.ioloop import IOLoop
+from tornado.options import options
+from logging import getLogger
 
 
-serve_forever(args.host, args.port)
+log = getLogger('wsreload')
+log.setLevel(10 if options.debug else 30)
+
+server.listen(options.server_port)
+IOLoop.instance().start()

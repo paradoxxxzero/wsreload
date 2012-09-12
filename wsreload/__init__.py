@@ -1,70 +1,76 @@
+# -*- coding: utf-8 -*-
+
+#     wsreload - Reload your tabs !
+#     Copyright (C) 2012 Florian Mounier <paradoxxx.zero@gmail.com>
+#
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU Affero General Public License as
+#     published by the Free Software Foundation, either version 3 of the
+#     License, or (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU Affero General Public License for more details.
+#
+#     You should have received a copy of the GNU Affero General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import tornado.options
+import tornado.web
+import tornado.websocket
+import logging
 import json
-import cherrypy
-from ws4py.client.threadedclient import WebSocketClient
-from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
-from ws4py.messaging import TextMessage
-from ws4py.websocket import WebSocket
+import os
 
 
-class BroadcastWebSocket(WebSocket):
-    def received_message(self, m):
-        cherrypy.log('Transmitting %s' % m)
-        cherrypy.engine.publish(
-            'websocket-broadcast',
-            TextMessage('%s' % m))
+log = logging.getLogger('wsreload')
 
 
-class Root(object):
-
-    @cherrypy.expose
-    def default(self):
-        return ''
-
-    def __getattr__(self, name):
-        if name.startswith('_') or name == 'exposed':
-            return object.__getattr__(name)
-        else:
-            return self.default
+class IndexHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render('index.html')
 
 
-def serve_forever(host, port):
-    WebSocketPlugin(cherrypy.engine).subscribe()
-    cherrypy.tools.websocket = WebSocketTool()
-
-    cherrypy.config.update({
-        'server.socket_host': host,
-        'server.socket_port': port
-    })
-
-    cherrypy.quickstart(Root(), '/', config={'/': {
-        'tools.websocket.on': True,
-        'tools.websocket.handler_cls': BroadcastWebSocket}
-    })
-
-
-class ReloadClient(WebSocketClient):
-    def __init__(self, host='127.0.0.1', port=50637, endpoint='wsreload',
-                 protocols=None, extensions=None,
-                 default_query=None, open_query=None):
-        WebSocketClient.__init__(
-            self, 'ws://%s:%s/%s' % (host, port, endpoint),
-            protocols, extensions)
-        self.default_query = default_query
-        self.open_query = open_query
-        self.connect()
+class WebSocketHandler(tornado.websocket.WebSocketHandler):
+    browsers = {}
 
     def reload(self, query=None):
-        self.send(json.dumps(query or self.default_query))
+        log.info('Reloading for query %s' % query)
+        for browser, ua in self.browsers.items():
+            log.debug('Reloading %s' % ua)
+            browser.write_message(query)
 
-    def opened(self):
-        if self.open_query:
-            self.reload(self.open_query)
+    def on_message(self, message):
+        log.debug('Got -> %s' % message)
+        data = ''
+        if '|' in message:
+            pipe = message.index('|')
+            message, data = message[:pipe], message[pipe + 1:]
+
+        if message == 'subscribe':
+            self.browsers[self] = data
+            log.info('Added -> %r' % data)
+        else if message == 'reload':
+            self.reload(data)
+        else if message == 'watch':
+            log.info('To watch: %s' % data)
+        else if message == 'unwatch':
+            log.info('To unwatch: %s' % data)
+        else:
+            log.warn('Unknown message: %s' % message)
+
+
+    def on_close(self):
+        if self in self.browsers:
+            ua = self.browsers.pop(self)
+            log.info('Lost -> %r' % ua)
+        else:
+            log.info('Lost annonymous connection')
 
 
 def monkey_patch_http_server(query, callback=None, **kwargs):
     from BaseHTTPServer import HTTPServer
     old_serve_forever = HTTPServer.serve_forever
-    rc = ReloadClient(**kwargs)
 
     def new_serve_forever(self):
         rc.reload(query)
@@ -73,3 +79,21 @@ def monkey_patch_http_server(query, callback=None, **kwargs):
         old_serve_forever(self)
 
     HTTPServer.serve_forever = new_serve_forever
+
+
+tornado.options.define("debug", default=False, help="Debug mode")
+tornado.options.define("server_host", default='127.0.0.1',
+                       help="Server and websocket host")
+tornado.options.define("server_port", default=50637,
+                       help="Server and websocket port")
+tornado.options.parse_command_line()
+
+server = tornado.web.Application(
+    [
+        (r"/", IndexHandler),
+        (r"/wsreload", WebSocketHandler),
+    ],
+    debug=tornado.options.options.debug,
+    static_path=os.path.join(os.path.dirname(__file__), "static"),
+    template_path=os.path.join(os.path.dirname(__file__), "templates")
+)
