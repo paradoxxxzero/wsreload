@@ -1,0 +1,10 @@
+[Unit]
+Description=Wsreload server
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/wsreload-server
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
