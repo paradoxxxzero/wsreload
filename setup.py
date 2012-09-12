@@ -18,11 +18,11 @@ class BuildScripts(build_scripts):
 
 setup(
     name="wsreload",
-    version='1.0.5',
+    version='1.1.0',
     description="Reload browser tabs through websocket",
     author="Florian Mounier",
     author_email="paradoxxx.zero@gmail.com",
-    packages=[],
+    packages=['wsreload'],
     scripts=['wsreload.py', 'wsreload-server.py'],
     cmdclass={"build_scripts": BuildScripts},
     platforms="Any",

@@ -16,14 +16,8 @@
 #
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+from wsreload import serve_forever
 import argparse
-import cherrypy
-
-from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
-from ws4py.messaging import TextMessage
-from ws4py.websocket import WebSocket
-
 parser = argparse.ArgumentParser(
     description='wsreload server',
     prog='wsreload-server',
@@ -34,35 +28,5 @@ parser.add_argument('-P', '--port', dest='port', type=int, default=50637)
 
 args = parser.parse_args()
 
-WebSocketPlugin(cherrypy.engine).subscribe()
-cherrypy.tools.websocket = WebSocketTool()
 
-
-class BroadcastWebSocket(WebSocket):
-    def received_message(self, m):
-        cherrypy.log('Transmitting %s' % m)
-        cherrypy.engine.publish(
-            'websocket-broadcast',
-            TextMessage('%s' % m))
-
-
-class Root(object):
-
-    @cherrypy.expose
-    def default(self):
-        return ''
-
-    def __getattr__(self, name):
-        if name.startswith('_') or name == 'exposed':
-            return object.__getattr__(name)
-        else:
-            return self.default
-
-cherrypy.config.update({
-    'server.socket_host': args.host,
-    'server.socket_port': args.port
-})
-
-cherrypy.quickstart(Root(), '/', config={'/': {
-    'tools.websocket.on': True,
-    'tools.websocket.handler_cls': BroadcastWebSocket}})
+serve_forever(args.host, args.port)

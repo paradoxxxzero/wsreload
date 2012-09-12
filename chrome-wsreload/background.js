@@ -24,46 +24,39 @@ var onopen = function (event) {
 };
 
 var onmessage = function (event) {
-    var delay = 5;
     console.log(event.data);
     eventobj = JSON.parse(event.data);
-    if(eventobj.delay) {
-        delay = eventobj.delay;
-        delete eventobj.delay;
-    }
-    setTimeout(function () {
-        chrome.tabs.query(eventobj, function(tabs) {
-            for(var i = 0; i < tabs.length ; i++) {
-                var tab = tabs[i];
-                chrome.tabs.reload(
-                    tab.id, {bypassCache: true},
-                    (function() {
-                        var this_tab = this;
-                        console.log('Reloaded ' + this_tab.title);
-                    }).bind(tab));
+    chrome.tabs.query(eventobj, function(tabs) {
+        for(var i = 0; i < tabs.length ; i++) {
+            var tab = tabs[i];
+            chrome.tabs.reload(
+                tab.id, {bypassCache: true},
+                (function() {
+                    var this_tab = this;
+                    console.log('Reloaded ' + this_tab.title);
+                }).bind(tab));
+        }
+        chrome.windows.getAll(function (windows) {
+            for(var i = 0; i < windows.length ; i++) {
+                var window = windows[i];
+                chrome.tabs.query(
+                    {windowId: window.id, active: true},
+                    (function (active_tabs) {
+                        var win = this;
+                        var active_tab = active_tabs[0];
+                        var to_highlight = tabs.filter(
+                            function (tab) { return tab.windowId == win.id; }
+                        ).map(
+                            function (tab) { return tab.index; }
+                        );
+                        to_highlight.unshift(active_tab.index);
+                        chrome.tabs.highlight(
+                            {windowId: win.id, tabs: to_highlight},
+                            function () {});
+                    }).bind(window));
             }
-            chrome.windows.getAll(function (windows) {
-                for(var i = 0; i < windows.length ; i++) {
-                    var window = windows[i];
-                    chrome.tabs.query(
-                        {windowId: window.id, active: true},
-                        (function (active_tabs) {
-                            var win = this;
-                            var active_tab = active_tabs[0];
-                            var to_highlight = tabs.filter(
-                                function (tab) { return tab.windowId == win.id; }
-                            ).map(
-                                function (tab) { return tab.index; }
-                            );
-                            to_highlight.unshift(active_tab.index);
-                            chrome.tabs.highlight(
-                                {windowId: win.id, tabs: to_highlight},
-                                function () {});
-                        }).bind(window));
-                }
-            });
         });
-    }, delay);
+    });
 };
 
 var onclose = function (event) {

@@ -19,9 +19,9 @@
 
 
 import argparse
-import json
 import os
-from ws4py.client.threadedclient import WebSocketClient
+from wsreload import ReloadClient
+
 
 chrome_parser = argparse.ArgumentParser(
     add_help=False,
@@ -89,15 +89,9 @@ query, _ = chrome_parser.parse_known_args()
 query = dict(filter(lambda x: x[1] is not None, vars(query).items()))
 
 opts = parser.parse_args()
+rc = ReloadClient(opts.host, opts.port, opts.endpoint, query,
+                  query if not opts.files else None)
 
-
-class ReloadClient(WebSocketClient):
-    def opened(self):
-        if not opts.files:
-            self.send(json.dumps(query))
-
-ws = ReloadClient('ws://%s:%s/%s' % (opts.host, opts.port, opts.endpoint))
-ws.connect()
 
 if opts.files:
     import asyncore
@@ -108,7 +102,7 @@ if opts.files:
         """Handler of inotify events."""
         def process_IN_CLOSE_WRITE(self, event):
             """Function launched when a file is written."""
-            ws.send(json.dumps(query))
+            rc.reload()
 
     pyinotify.AsyncNotifier(watcher, EventHandler())
 
