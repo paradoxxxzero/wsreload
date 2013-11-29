@@ -38,13 +38,13 @@ def sporadic_websocket_send(host, port, endpoint, message):
     ioloop.start()
 
 
-def sporadic_reload(query, host="127.0.0.1", port=50637, endpoint='endpoint'):
+def sporadic_reload(query, host="127.0.0.1", port=50637, endpoint='wsreload'):
     """Send reload `query` to all connected browsers"""
     sporadic_websocket_send(
         host, port, endpoint, 'reload|' + json.dumps(query))
 
 
-def watch(query, files, host="127.0.0.1", port=50637, endpoint='endpoint'):
+def watch(query, files, host="127.0.0.1", port=50637, endpoint='wsreload'):
     """Tell the server to watch files and reload tabs whenever a file change"""
     sporadic_websocket_send(
         host, port, endpoint,
@@ -53,8 +53,25 @@ def watch(query, files, host="127.0.0.1", port=50637, endpoint='endpoint'):
             'files': files}))
 
 
-def unwatch(files, host="127.0.0.1", port=50637, endpoint='endpoint'):
+def unwatch(files, host="127.0.0.1", port=50637, endpoint='wsreload'):
     """Tell the server to stop watching files"""
     sporadic_websocket_send(
         host, port, endpoint,
         'unwatch_files|' + json.dumps(files))
+
+
+def monkey_patch_http_server(query, callback=None, **kwargs):
+    try:
+        from http.server import HTTPServer
+    except ImportError:
+        from BaseHTTPServer import HTTPServer
+
+    old_serve_forever = HTTPServer.serve_forever
+
+    def new_serve_forever(self):
+        if callback:
+            sporadic_reload(query, **kwargs)
+            callback(self)
+        old_serve_forever(self)
+
+    HTTPServer.serve_forever = new_serve_forever

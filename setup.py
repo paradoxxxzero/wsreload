@@ -10,7 +10,7 @@ class BuildScripts(build_scripts):
     """Build the package."""
     def run(self):
         """Run building."""
-        # These lines remove the .py extension from the radicale executable
+        # These lines remove the .py extension from executables
         self.mkpath(self.build_dir)
         for script in self.scripts:
             root, _ = os.path.splitext(script)

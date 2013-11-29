@@ -16,13 +16,14 @@
     console.log("Connection opened");
     send("subscribe|" + navigator.userAgent);
     return chrome.tabs.query({}, function(tabs) {
-      var tab, _i, _len, _results;
+      var file, tab, _i, _len, _results;
       _results = [];
       for (_i = 0, _len = tabs.length; _i < _len; _i++) {
         tab = tabs[_i];
         if (tab.url.indexOf('file://') === 0) {
-          watched_files[tab.id] = tab.url;
-          _results.push(send("watch|" + tab.url));
+          file = tab.url.replace('file://', '');
+          watched_files[tab.id] = file;
+          _results.push(send("watch|" + file));
         } else {
           _results.push(void 0);
         }
@@ -32,7 +33,7 @@
   };
 
   chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    var url;
+    var file, url;
     if (!changeInfo.url) {
       return;
     }
@@ -43,8 +44,9 @@
     if (url.indexOf('file://') !== 0) {
       return;
     }
-    watched_files[tabId] = url;
-    return send("watch|" + url);
+    file = url.replace('file://', '');
+    watched_files[tabId] = file;
+    return send("watch|" + file);
   });
 
   chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {

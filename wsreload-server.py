@@ -17,14 +17,13 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from wsreload.server import server
-from tornado.ioloop import IOLoop
+from wsreload.server import server, ioloop
 from tornado.options import options
 from logging import getLogger
-
 
 log = getLogger('wsreload')
 log.setLevel(10 if options.debug else 30)
 
 server.listen(options.server_port)
-IOLoop.instance().start()
+
+ioloop.start()

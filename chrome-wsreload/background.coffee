@@ -30,8 +30,9 @@ onopen = ->
         for tab in tabs
             # Checking for local files
             if tab.url.indexOf('file://') is 0
-                watched_files[tab.id] = tab.url
-                send "watch|#{tab.url}"
+                file = tab.url.replace('file://', '')
+                watched_files[tab.id] = file
+                send "watch|#{file}"
 
 # Synchronise opened local files and watched files
 chrome.tabs.onUpdated.addListener (tabId, changeInfo, tab) ->
@@ -41,8 +42,9 @@ chrome.tabs.onUpdated.addListener (tabId, changeInfo, tab) ->
         send "unwatch|#{watched_files[tabId]}"
 
     return unless url.indexOf('file://') is 0
-    watched_files[tabId] = url
-    send "watch|#{url}"
+    file = url.replace('file://', '')
+    watched_files[tabId] = file
+    send "watch|#{file}"
 
 chrome.tabs.onRemoved.addListener (tabId, removeInfo) ->
     if tabId of watched_files
