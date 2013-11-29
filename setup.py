@@ -29,9 +29,12 @@ setup(
     provides=['wsreload'],
     install_requires=['tornado', 'pyinotify'],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
+        "Environment :: Web Environment",
         "License :: OSI Approved :: GNU Affero General Public License v3",
         "Intended Audience :: End Users/Desktop",
-        "Operating System :: OS Independent",
+        "Intended Audience :: Developers",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3"])

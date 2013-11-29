@@ -22,7 +22,6 @@ import tornado.ioloop
 import pyinotify
 import logging
 import json
-import os
 
 
 log = logging.getLogger('wsreload')
@@ -36,7 +35,7 @@ class Watcher(pyinotify.TornadoAsyncNotifier):
         self.files = files
         self.query = query
         self.notifier = pyinotify.TornadoAsyncNotifier(
-            inotify, ioloop, self.notified)
+            inotify, ioloop, self.notified, pyinotify.ProcessEvent())
         inotify.add_watch(
             files, pyinotify.EventsCodes.ALL_FLAGS['IN_CLOSE_WRITE'])
 
@@ -47,11 +46,6 @@ class Watcher(pyinotify.TornadoAsyncNotifier):
     def close(self):
         log.debug('Closing for %s' % self.files)
         self.notifier.stop()
-
-
-class IndexHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.render('index.html')
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -124,14 +118,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             log.info('Lost annonymous connection')
 
 
-def notify(notifier):
-    """
-    Just stop receiving IO read events after the first
-    iteration (unrealistic example).
-    """
-    log.info('notified')
-
-
 tornado.options.define("debug", default=False, help="Debug mode")
 tornado.options.define("server_host", default='127.0.0.1',
                        help="Server and websocket host")
@@ -142,10 +128,8 @@ tornado.options.parse_command_line()
 
 server = tornado.web.Application(
     [
-        (r"/", IndexHandler),
         (r"/wsreload", WebSocketHandler),
     ],
-    debug=tornado.options.options.debug,
-    static_path=os.path.join(os.path.dirname(__file__), "static"),
-    template_path=os.path.join(os.path.dirname(__file__), "templates")
+    debug=tornado.options.options.debug
+
 )
