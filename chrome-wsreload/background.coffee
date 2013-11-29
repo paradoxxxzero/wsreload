@@ -30,7 +30,7 @@ onopen = ->
         for tab in tabs
             # Checking for local files
             if tab.url.indexOf('file://') is 0
-                file = tab.url.replace('file://', '')
+                file = decodeURI(tab.url.replace('file://', ''))
                 watched_files[tab.id] = file
                 send "watch|#{file}"
 
@@ -42,7 +42,7 @@ chrome.tabs.onUpdated.addListener (tabId, changeInfo, tab) ->
         send "unwatch|#{watched_files[tabId]}"
 
     return unless url.indexOf('file://') is 0
-    file = url.replace('file://', '')
+    file = decodeURIComponent(url.replace('file://', ''))
     watched_files[tabId] = file
     send "watch|#{file}"
 
@@ -53,6 +53,8 @@ chrome.tabs.onRemoved.addListener (tabId, removeInfo) ->
 onmessage = (event) ->
     console.log event.data
     eventobj = JSON.parse(event.data)
+    if eventobj.url
+        eventobj.url = encodeURI(eventobj.url)
     chrome.tabs.query eventobj, (tabs) ->
         # Reloading tabs
         for tab in tabs

@@ -21,7 +21,7 @@
       for (_i = 0, _len = tabs.length; _i < _len; _i++) {
         tab = tabs[_i];
         if (tab.url.indexOf('file://') === 0) {
-          file = tab.url.replace('file://', '');
+          file = decodeURI(tab.url.replace('file://', ''));
           watched_files[tab.id] = file;
           _results.push(send("watch|" + file));
         } else {
@@ -44,7 +44,7 @@
     if (url.indexOf('file://') !== 0) {
       return;
     }
-    file = url.replace('file://', '');
+    file = decodeURIComponent(url.replace('file://', ''));
     watched_files[tabId] = file;
     return send("watch|" + file);
   });
@@ -59,6 +59,9 @@
     var eventobj;
     console.log(event.data);
     eventobj = JSON.parse(event.data);
+    if (eventobj.url) {
+      eventobj.url = encodeURI(eventobj.url);
+    }
     return chrome.tabs.query(eventobj, function(tabs) {
       var tab, _i, _len;
       for (_i = 0, _len = tabs.length; _i < _len; _i++) {
