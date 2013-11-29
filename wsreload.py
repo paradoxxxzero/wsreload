@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #     wsreload - Reload your tabs !
@@ -16,13 +16,9 @@
 #
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
+from wsreload.client import sporadic_reload, watch, unwatch
 import argparse
-import json
 import os
-import tornado.websocket
-from tornado.ioloop import IOLoop
 
 
 chrome_parser = argparse.ArgumentParser(
@@ -81,45 +77,27 @@ parser.add_argument('-H', '--host', dest='host', type=str, default='127.0.0.1')
 parser.add_argument('-P', '--port', dest='port', type=int, default=50637)
 parser.add_argument('-E', '--endpoint', dest='endpoint',
                     type=str, default='wsreload')
-parser.add_argument(
-    dest='files', type=str, nargs='*',
-    help='Optional files to watch with inotify (reload tab on file change)')
 
+parser.add_argument(
+    '--watch', dest='watch', nargs='+',
+    help='Tell the server to watch files '
+    'and reload according to the other options')
+
+parser.add_argument(
+    '--unwatch', dest='unwatch',  nargs='+',
+    help='Tell the server to unwatch the following files')
 
 query, _ = chrome_parser.parse_known_args()
 query = dict(filter(lambda x: x[1] is not None, vars(query).items()))
 
 opts = parser.parse_args()
-ioloop = IOLoop.instance()
 
 
-def websocket_ready(connection):
-    ws = connection.result()
-    ws.write_message('reload|' + json.dumps(query))
-    ioloop.stop()
-
-tornado.websocket.websocket_connect(
-    'ws://%s:%d/%s' % (opts.host, opts.port, opts.endpoint),
-    ioloop, websocket_ready)
-
-ioloop.start()
-
-if opts.files:
-    import asyncore
-    import pyinotify
-    watcher = pyinotify.WatchManager()
-
-    class EventHandler(pyinotify.ProcessEvent):
-        """Handler of inotify events."""
-        def process_IN_CLOSE_WRITE(self, event):
-            """Function launched when a file is written."""
-            rc.reload()
-
-    pyinotify.AsyncNotifier(watcher, EventHandler())
-
-    for file_ in opts.files:
-        absolute_file = os.path.join(os.getcwd(), file_)
-        watcher.add_watch(
-            absolute_file,
-            pyinotify.IN_CLOSE_WRITE)
-    asyncore.loop()
+if opts.watch:
+    files = list(map(lambda x: os.path.abspath(x), opts.watch))
+    watch(query, files, opts.host, opts.port, opts.endpoint)
+elif opts.unwatch:
+    files = list(map(lambda x: os.path.abspath(x), opts.unwatch))
+    unwatch(files, opts.host, opts.port, opts.endpoint)
+else:
+    sporadic_reload(query, opts.host, opts.port, opts.endpoint)

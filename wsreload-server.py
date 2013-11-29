@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #     wsreload - Reload your tabs !
@@ -17,7 +17,7 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from wsreload import server
+from wsreload.server import server
 from tornado.ioloop import IOLoop
 from tornado.options import options
 from logging import getLogger

@@ -18,7 +18,7 @@ class BuildScripts(build_scripts):
 
 setup(
     name="wsreload",
-    version='1.1.1',
+    version='2.0',
     description="Reload browser tabs through websocket",
     author="Florian Mounier",
     author_email="paradoxxx.zero@gmail.com",
@@ -27,11 +27,11 @@ setup(
     cmdclass={"build_scripts": BuildScripts},
     platforms="Any",
     provides=['wsreload'],
-    install_requires=['ws4py', 'cherrypy', 'pyinotify'],
+    install_requires=['tornado', 'pyinotify'],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
         "License :: OSI Approved :: GNU Affero General Public License v3",
         "Intended Audience :: End Users/Desktop",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2"])
+        "Programming Language :: Python :: 3"])
