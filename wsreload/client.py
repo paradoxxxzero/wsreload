@@ -18,8 +18,17 @@
 
 
 from tornado.ioloop import IOLoop
+from glob import glob
+import atexit
 import tornado.websocket
 import json
+import os
+
+
+def expand(files):
+    return [file
+            for abs_file in map(lambda x: os.path.abspath(x), files)
+            for file in glob(abs_file)]
 
 
 def sporadic_websocket_send(host, port, endpoint, message):
@@ -44,20 +53,35 @@ def sporadic_reload(query, host="127.0.0.1", port=50637, endpoint='wsreload'):
         host, port, endpoint, 'reload|' + json.dumps(query))
 
 
-def watch(query, files, host="127.0.0.1", port=50637, endpoint='wsreload'):
+def watch(query, files, host="127.0.0.1", port=50637, endpoint='wsreload',
+          unwatch_at_exit=False):
     """Tell the server to watch files and reload tabs whenever a file change"""
     sporadic_websocket_send(
         host, port, endpoint,
         'watch_files|' + json.dumps({
             'query': json.dumps(query),
-            'files': files}))
+            'files': expand(files)}))
+
+    if unwatch_at_exit:
+        import signal
+        import sys
+
+        def unwatch_atexit():
+            unwatch(files)
+
+        def on_kill(*args):
+            unwatch_atexit()
+            sys.exit(1)
+
+        atexit.register(unwatch_atexit)
+        signal.signal(signal.SIGTERM, on_kill)
 
 
 def unwatch(files, host="127.0.0.1", port=50637, endpoint='wsreload'):
     """Tell the server to stop watching files"""
     sporadic_websocket_send(
         host, port, endpoint,
-        'unwatch_files|' + json.dumps(files))
+        'unwatch_files|' + json.dumps(expand(files)))
 
 
 def monkey_patch_http_server(query, callback=None, **kwargs):

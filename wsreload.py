@@ -94,10 +94,8 @@ opts = parser.parse_args()
 
 
 if opts.watch:
-    files = list(map(lambda x: os.path.abspath(x), opts.watch))
-    watch(query, files, opts.host, opts.port, opts.endpoint)
+    watch(query, opts.watch, opts.host, opts.port, opts.endpoint)
 elif opts.unwatch:
-    files = list(map(lambda x: os.path.abspath(x), opts.unwatch))
-    unwatch(files, opts.host, opts.port, opts.endpoint)
+    unwatch(opts.unwatch, opts.host, opts.port, opts.endpoint)
 else:
     sporadic_reload(query, opts.host, opts.port, opts.endpoint)
