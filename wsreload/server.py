@@ -37,7 +37,8 @@ class Watcher(pyinotify.TornadoAsyncNotifier):
         self.notifier = pyinotify.TornadoAsyncNotifier(
             inotify, ioloop, self.notified, pyinotify.ProcessEvent())
         inotify.add_watch(
-            files, pyinotify.EventsCodes.ALL_FLAGS['IN_CLOSE_WRITE'])
+            files, pyinotify.EventsCodes.ALL_FLAGS['IN_CLOSE_WRITE'],
+            rec=True)
 
     def notified(self, notifier):
         log.debug('Got notified for %s' % self.files)
