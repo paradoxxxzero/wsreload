@@ -36,9 +36,9 @@ This command will produce a file named `firefox-wsreload.xpi`. You can simply dr
 * Use a tab reloading criteria :
     - *file://* : Every local file opened in your browser with a `file://` scheme will be automatically synchronized.
     - *matching*: Reload all tabs that match a pattern, e.g.
-```    
+    ```    
         $wsreload --watch foo/bar --url "http://localhost:8080/*"
-```        
+    ```        
     Tells the browser to reload all tabs that match the following url pattern : `http://localhost:8080/*` whenever a file in the `foo/bar` directory is modified. 
 
 ## Related
@@ -55,8 +55,8 @@ Free use of this software is granted under the terms of the MPL License.
 
 ## About
 
-- Firefox extension written by Cristian Martinez <me-at-martinec.org>
-- WSReload author is Florian Mounier <paradoxxx.zero-at-gmail.com>
+- Firefox extension written by Cristian Martinez <me@martinec.org>
+- WSReload author is Florian Mounier <paradoxxx.zero@gmail.com>
 
 ----
 
