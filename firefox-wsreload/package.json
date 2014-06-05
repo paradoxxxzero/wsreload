@@ -1,0 +1,31 @@
+{
+  "name"          : "firefox-wsreload",
+  "title"         : "WSTabReload",
+  "id"            : "jid1-lYV4vwAh4e3BsQ",
+  "icon"          : "data/icon-48.png",
+  "icon64"        : "data/icon-64.png",
+  "description"   : "Automatically reload your browser tabs",
+  "author"        : "Cristian Martinez",
+  "license"       : "MPL 2.0",
+  "version"       : "1.0.2",
+  "homepage"      : "http://github.com/martinec/wsreload/firefox-wsreload",
+  "keywords"      : [
+                    "tab", "reload", "webtool", "developer", "websocket"
+  ],
+  "preferences"   : [
+    {
+      "name"        : "highlightColor",
+      "title"       : "Highlight color",
+      "description" : "Highlight color for reloaded tabs",
+      "type"        : "color",
+      "value"       : "#339900"
+    },
+    {
+      "name"        : "listening",
+      "type"        : "bool",
+      "value"       : true,
+      "title"       : "Listening messages ?",
+      "hidden"      : true
+    }
+  ]
+}
