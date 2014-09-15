@@ -1,6 +1,6 @@
 # WSTabReload Firefox Addon 
 
-> Forget about the `[F5]` key! WSTabReload is a web development productivity tool that will help you automatically reload the Firefox browser tabs every time local files are changed.
+> Forget about the `[F5]` key! WSTabReload is a web development productivity tool that will help you to automatically reload your browser tabs every time selected local files are changed.
 
 ![](screenshot.png)
 
@@ -11,7 +11,7 @@
 
 ## Installation
 
-Install from the [Firefox Add-ons site](ToDo).
+Install from the [Firefox Add-ons site](https://addons.mozilla.org/en-US/firefox/addon/wstabreload/).
 
 ## Build
 
@@ -37,13 +37,13 @@ This command will produce a file named `firefox-wsreload.xpi`. You can simply dr
     - *file://* : Every local file opened in your browser with a `file://` scheme will be automatically synchronized.
     - *matching*: Reload all tabs that match a pattern, e.g.
     ```    
-        $wsreload --watch foo/bar --url "http://localhost:8080/*"
+        $ wsreload --watch foo/bar --url "http://localhost:8080/*"
     ```        
     Tells the browser to reload all tabs that match the following url pattern : `http://localhost:8080/*` whenever a file in the `foo/bar` directory is modified. 
 
 ## Related
 
-Also available on [Chrome](https://github.com/paradoxxxzero/wsreload/tree/master/chrome-wsreload).
+Also available on [Chrome](https://chrome.google.com/webstore/detail/wsreload/knefplbckfcppebehbomeankfgjalmak).
 
 ## Contribute
 
@@ -56,7 +56,7 @@ Free use of this software is granted under the terms of the MPL License.
 ## About
 
 - Firefox extension written by Cristian Martinez <me@martinec.org>
-- WSReload author is Florian Mounier <paradoxxx.zero@gmail.com>
+- [WSReload][] author is Florian Mounier <paradoxxx.zero@gmail.com>
 
 ----
 
